@@ -83,6 +83,6 @@ class Fourmiliere:
         while not self.toutes_fourmis_dans_dortoir():
             self.deplacer_fourmis()
             etapes += 1
-            print(f"Étape {etapes}: Positions des fourmis: {self.positions}")
-            print(f"Étape {etapes}: État des salles: {self.salles}")
+            # print(f"Étape {etapes}: Positions des fourmis: {self.positions}")
+            # print(f"Étape {etapes}: État des salles: {self.salles}")
         return etapes
