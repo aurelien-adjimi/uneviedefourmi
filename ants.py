@@ -1,114 +1,74 @@
-class Ant:
-    def __init__(self, id):
-        self.id = id
-        self.position = 'V'  # Starting position
+class Fourmiliere:
+    def __init__(self, salles, tunnels, nb_fourmis, capacites):
+        self.salles = salles
+        self.tunnels = tunnels
+        self.nb_fourmis = nb_fourmis
+        self.capacites = capacites
+        self.positions = {i: 'Sv' for i in range(nb_fourmis)}
+        self.salles['Sv'] = nb_fourmis
+        self.salles['Sd'] = 0
+        self.historique = {i: ['Sv'] for i in range(nb_fourmis)}  # Historique des déplacements des fourmis
 
-    def move_to(self, new_position):
-        self.position = new_position
+    def deplacer_fourmis(self):
+        for fourmi in range(self.nb_fourmis):
+            current_room = self.positions[fourmi]
+            if current_room == 'Sd':
+                continue
+            for next_room in self.tunnels[current_room]:
+                if self.peut_se_deplacer(next_room, fourmi):
+                    self.positions[fourmi] = next_room
+                    self.salles[current_room] -= 1
+                    self.salles[next_room] += 1
+                    self.historique[fourmi].append(next_room)  # Mettre à jour l'historique
+                    break
 
-class Room:
-    def __init__(self, name, capacity=0):
-        self.name = name
-        self.capacity = capacity
-        self.ants = []
-
-    def add_ant(self, ant):
-        if self.capacity == 0 or len(self.ants) < self.capacity:
-            self.ants.append(ant)
+    def peut_se_deplacer(self, salle, fourmi):
+        # Le dortoir peut accueillir plusieurs fourmis
+        if salle == 'Sd':
             return True
-        return False
-
-    def remove_ant(self, ant):
-        if ant in self.ants:
-            self.ants.remove(ant)
-            return True
-        return False
-
-class Anthill:
-    def __init__(self):
-        self.rooms = {}
-        self.tunnels = []
-        self.num_ants = 0
-
-    def add_room(self, name, capacity=0):
-        self.rooms[name] = Room(name, capacity)
-
-    def add_tunnel(self, room1, room2):
-        self.tunnels.append((room1, room2))
-
-    def set_num_ants(self, num):
-        self.num_ants = num
-
-    def move_ant(self, ant, from_room, to_room):
-        if from_room not in self.rooms or to_room not in self.rooms:
-            print(f"Error: Invalid room names: {from_room}, {to_room}")
+        # Une fourmi ne peut pas retourner dans une salle qu'elle a déjà quittée
+        if salle in self.historique[fourmi]:
             return False
-        if self.rooms[from_room].remove_ant(ant) and self.rooms[to_room].add_ant(ant):
-            ant.move_to(to_room)
-            return True
-        return False
+        # Vérifier la capacité de la salle
+        if self.salles[salle] >= self.capacites[salle]:
+            return False
+        # Vérifier si la salle rapproche la fourmi du dortoir
+        if not self.est_sur_chemin_optimal(salle, fourmi):
+            return False
+        return True
 
-    def initialize_ants(self):
-        ants = [Ant(i) for i in range(self.num_ants)]
-        for ant in ants:
-            if not self.rooms['Sv'].add_ant(ant):
-                print(f"Error: Not enough capacity in room 'Sv' for ant {ant.id}")
-                return
-            ant.move_to('Sv')
-        return ants
+    def est_sur_chemin_optimal(self, salle, fourmi):
+        # Déterminer si une salle est sur le chemin optimal vers le dortoir
+        chemin_optimal = self.trouver_chemin_optimal(self.positions[fourmi], 'Sd')
+        return salle in chemin_optimal
 
-    def move_ants_to_dormitory(self, ants):
-        steps = 0
-        while any(ant.position != 'Sd' for ant in ants):
-            print(f"Step {steps}: Ant positions {[ant.position for ant in ants]}")
-            for ant in ants:
-                if ant.position == 'Sd':
-                    continue
-                current_room = ant.position
-                moved = False
-                # Try to find a valid tunnel
-                for tunnel in self.tunnels:
-                    if tunnel[0] == current_room:
-                        next_room = tunnel[1]
-                        if self.move_ant(ant, current_room, next_room):
-                            print(f"Ant {ant.id} successfully moved from {current_room} to {next_room}")
-                            moved = True
-                            break
-                if not moved:
-                    print(f"Ant {ant.id} could not move from {current_room} - no valid tunnel found")
-            steps += 1
-        return steps
+    def trouver_chemin_optimal(self, depart, arrivee):
+        # Utiliser un algorithme de recherche en largeur pour trouver le chemin optimal
+        from collections import deque
 
-    @classmethod
-    def from_file(cls, file_path):
-        anthill = cls()
-        anthill.add_room('Sv', 0)  # Ensure 'Sv' room is added with unlimited capacity
-        anthill.add_room('Sd', 0)  # Ensure 'Sd' room is added with unlimited capacity
-        try:
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
-                print("File read successfully.")
-                for line in lines:
-                    line = line.strip()
-                    if line.startswith('f='):
-                        num_ants = int(line.split('=')[1].strip())
-                        anthill.set_num_ants(num_ants)
-                        print(f"Number of ants: {num_ants}")
-                    elif line.startswith('S') and ' - ' not in line:
-                        if '{' in line and '}' in line:
-                            name = line.split('{')[0].strip()
-                            capacity = int(line.split('{')[1].split('}')[0].strip())
-                        else:
-                            name = line.strip()
-                            capacity = 1  # Default capacity for rooms without specified capacity
-                        if name not in ['Sv', 'Sd']:  # Avoid re-adding 'Sv' and 'Sd'
-                            anthill.add_room(name, capacity)
-                            print(f"Room added: {name} with capacity {capacity}")
-                    elif ' - ' in line:
-                        parts = line.split(' - ')
-                        anthill.add_tunnel(parts[0].strip(), parts[1].strip())
-                        print(f"Tunnel added between {parts[0].strip()} and {parts[1].strip()}")
-            return anthill
-        except Exception as e:
-            print(f"Error reading file: {e}")
-            return None
+        queue = deque([(depart, [depart])])
+        visites = set()
+
+        while queue:
+            current, path = queue.popleft()
+            if current == arrivee:
+                return path
+            if current not in visites:
+                visites.add(current)
+                for voisin in self.tunnels[current]:
+                    if voisin not in visites:
+                        queue.append((voisin, path + [voisin]))
+        return []
+
+    def toutes_fourmis_dans_dortoir(self):
+        return self.salles['Sd'] == self.nb_fourmis
+
+    def simuler(self):
+        etapes = 0
+        while not self.toutes_fourmis_dans_dortoir():
+            self.deplacer_fourmis()
+            etapes += 1
+            # Debug: Afficher l'état de la simulation à chaque étape
+            print(f"Étape {etapes}: Positions des fourmis: {self.positions}")
+            print(f"Étape {etapes}: État des salles: {self.salles}")
+        return etapes

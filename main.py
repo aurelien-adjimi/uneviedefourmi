@@ -1,32 +1,51 @@
-import os
-from ants import Anthill
+from ants import Fourmiliere
 
-def main():
-    nest_folder = 'Nest'
-    files = [f for f in os.listdir(nest_folder) if f.startswith('fourmiliere_') and f.endswith('.txt')]
-    print("Available anthills:")
-    for file in files:
-        print(f"- {file}")
+def lire_fichier_fourmiliere(fichier):
+    with open(fichier, 'r') as f:
+        lignes = f.readlines()
 
-    choice = input("Enter the name of the anthill file you want to solve: ")
-    file_path = os.path.join(nest_folder, choice)
+    nb_fourmis = int(lignes[0].strip().split('=')[1])
+    salles = {'Sv': 0, 'Sd': 0}  # Initialiser les salles spéciales
+    capacites = {'Sv': float('inf'), 'Sd': float('inf')}  # Capacités des salles spéciales
+    tunnels = {'Sv': [], 'Sd': []}
+    i = 1
 
-    if not os.path.exists(file_path):
-        print("File not found. Please enter a valid file name.")
-        return
+    # Lire les salles
+    while i < len(lignes) and '-' not in lignes[i]:
+        ligne = lignes[i].strip()
+        if '{' in ligne:
+            salle, capacite = ligne.split('{')
+            salle = salle.strip()
+            capacite = int(capacite.strip(' }'))
+        else:
+            salle = ligne
+            capacite = 1
+        salles[salle] = 0
+        capacites[salle] = capacite
+        tunnels[salle] = []
+        i += 1
 
-    anthill = Anthill.from_file(file_path)
-    if anthill is None:
-        print("Failed to read the anthill from the file.")
-        return
+    # Lire les tunnels
+    while i < len(lignes):
+        salle1, salle2 = lignes[i].strip().split(' - ')
+        tunnels[salle1].append(salle2)
+        tunnels[salle2].append(salle1)
+        i += 1
 
-    ants = anthill.initialize_ants()
-    if ants is None:
-        return
-
-    print("Starting to move ants to dormitory...")
-    steps = anthill.move_ants_to_dormitory(ants)
-    print(f"All ants reached the dormitory in {steps} steps.")
+    return nb_fourmis, salles, tunnels, capacites
 
 if __name__ == "__main__":
-    main()
+    fichier = 'Nest/fourmiliere_cinq.txt'
+    nb_fourmis, salles, tunnels, capacites = lire_fichier_fourmiliere(fichier)
+    
+    # Debug: Afficher les données lues
+    print(f"Nombre de fourmis: {nb_fourmis}")
+    print(f"Salles: {salles}")
+    print(f"Capacités: {capacites}")
+    print(f"Tunnels: {tunnels}")
+    
+    fourmiliere = Fourmiliere(salles, tunnels, nb_fourmis, capacites)
+    etapes = fourmiliere.simuler()
+    
+    # Debug: Afficher le résultat de la simulation
+    print(f"Nombre d'étapes pour que toutes les fourmis atteignent le dortoir: {etapes}")
