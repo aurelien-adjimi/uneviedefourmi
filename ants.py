@@ -1,4 +1,9 @@
+from collections import deque
+
 class Fourmiliere:
+    """
+    Classe représentant une fourmilière.
+    """
     def __init__(self, salles, tunnels, nb_fourmis, capacites):
         self.salles = salles
         self.tunnels = tunnels
@@ -7,9 +12,12 @@ class Fourmiliere:
         self.positions = {i: 'Sv' for i in range(nb_fourmis)}
         self.salles['Sv'] = nb_fourmis
         self.salles['Sd'] = 0
-        self.historique = {i: ['Sv'] for i in range(nb_fourmis)}  # Historique des déplacements des fourmis
+        self.historique = {i: ['Sv'] for i in range(nb_fourmis)}
 
     def deplacer_fourmis(self):
+        """ 
+        Déplace les fourmis d'une salle à une autre.
+        """
         for fourmi in range(self.nb_fourmis):
             current_room = self.positions[fourmi]
             if current_room == 'Sd':
@@ -19,33 +27,34 @@ class Fourmiliere:
                     self.positions[fourmi] = next_room
                     self.salles[current_room] -= 1
                     self.salles[next_room] += 1
-                    self.historique[fourmi].append(next_room)  # Mettre à jour l'historique
+                    self.historique[fourmi].append(next_room)
                     break
 
     def peut_se_deplacer(self, salle, fourmi):
-        # Le dortoir peut accueillir plusieurs fourmis
+        """
+        Vérifie si une fourmi peut se déplacer dans une salle donnée.
+        """
         if salle == 'Sd':
             return True
-        # Une fourmi ne peut pas retourner dans une salle qu'elle a déjà quittée
         if salle in self.historique[fourmi]:
             return False
-        # Vérifier la capacité de la salle
         if self.salles[salle] >= self.capacites[salle]:
             return False
-        # Vérifier si la salle rapproche la fourmi du dortoir
         if not self.est_sur_chemin_optimal(salle, fourmi):
             return False
         return True
 
     def est_sur_chemin_optimal(self, salle, fourmi):
-        # Déterminer si une salle est sur le chemin optimal vers le dortoir
+        """
+        Vérifie si une fourmi est sur le chemin optimal pour atteindre une salle donnée.
+        """
         chemin_optimal = self.trouver_chemin_optimal(self.positions[fourmi], 'Sd')
         return salle in chemin_optimal
 
     def trouver_chemin_optimal(self, depart, arrivee):
-        # Utiliser un algorithme de recherche en largeur pour trouver le chemin optimal
-        from collections import deque
-
+        """
+        Trouve le chemin optimal entre deux salles.
+        """
         queue = deque([(depart, [depart])])
         visites = set()
 
@@ -61,14 +70,19 @@ class Fourmiliere:
         return []
 
     def toutes_fourmis_dans_dortoir(self):
+        """
+        Vérifie si toutes les fourmis sont dans le dortoir.
+        """
         return self.salles['Sd'] == self.nb_fourmis
 
     def simuler(self):
+        """"
+        Simule le déplacement des fourmis jusqu'à ce que toutes les fourmis soient dans le dortoir.
+        """
         etapes = 0
         while not self.toutes_fourmis_dans_dortoir():
             self.deplacer_fourmis()
             etapes += 1
-            # Debug: Afficher l'état de la simulation à chaque étape
             print(f"Étape {etapes}: Positions des fourmis: {self.positions}")
             print(f"Étape {etapes}: État des salles: {self.salles}")
         return etapes
