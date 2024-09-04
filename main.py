@@ -45,16 +45,29 @@ def lire_fichier_fourmiliere(fichier):
     return nb_fourmis, salles, tunnels, capacites
 
 if __name__ == "__main__":
-    fichier = 'Nest/fourmiliere_cinq.txt'
+    fichier_zero = 'Nest/fourmiliere_zero.txt'
+    fichier_un = 'Nest/fourmiliere_un.txt'
+    fichier_deux = 'Nest/fourmiliere_deux.txt'
+    fichier_trois = 'Nest/fourmiliere_trois.txt'
+    fichier_quatre = 'Nest/fourmiliere_quatre.txt'
+    fichier_cinq = 'Nest/fourmiliere_cinq.txt'
+    
+    # ask user to choose a file using input
+    fichier = input("Entrer le numéro du fichier de fourmilière à simuler (0, 1, 2, 3, 4, 5): ")
+    if fichier == '0':
+        fichier = fichier_zero
+    elif fichier == '1':
+        fichier = fichier_un
+    elif fichier == '2':
+        fichier = fichier_deux
+    elif fichier == '3':
+        fichier = fichier_trois
+    elif fichier == '4':
+        fichier = fichier_quatre
+    elif fichier == '5':
+        fichier = fichier_cinq
+
     nb_fourmis, salles, tunnels, capacites = lire_fichier_fourmiliere(fichier)
-
-    # print(f"Nombre de fourmis: {nb_fourmis}")
-    # print(f"Salles: {salles}")
-    # print(f"Capacités: {capacites}")
-    # print(f"Tunnels: {tunnels}")
-
-    fourmiliere = Fourmiliere(salles, tunnels, nb_fourmis, capacites)
-    etapes = fourmiliere.simuler()
 
 
     # creation de graphique pour visualiser les salles, les tunnels et les fourmis
@@ -62,14 +75,15 @@ if __name__ == "__main__":
     G.add_nodes_from(salles.keys())
     for salle, tunnel in tunnels.items():
         for t in tunnel:
-            G.add_edge(salle, t)
+            # add edge between salle and t with a arrow head
+            G.add_edge(salle, t, color='black', arrowstyle='-|>', arrowsize=15)
 
     pos = {
         'Sv': (0, 1),
         'Sd': (1, 0),
     }
 
-    pos.update(nx.spring_layout(G, seed=404))
+    pos.update(nx.spring_layout(G, seed=42))
 
     color_map = []
     for node in G:
@@ -84,7 +98,12 @@ if __name__ == "__main__":
 
     plt.show()
 
-    # # simuler le déplacement des fourmis par étapes sur le graphiques
+    fourmiliere = Fourmiliere(salles, tunnels, nb_fourmis, capacites)
+    etapes = fourmiliere.simuler()
+
+    print(f"Nombre d'étapes pour que chaques fourmis arrive au dortoir: {etapes}")
+
+        # simuler le déplacement des fourmis par étapes sur le graphiques
     # for etape in range(etapes):
     #     plt.clf()
     #     # pour chaques fourmis ajouter un point rouge à bord noir et numéro blanc sur la salle dans laquelle elle se trouve

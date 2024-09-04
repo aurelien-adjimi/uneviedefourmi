@@ -80,9 +80,18 @@ class Fourmiliere:
         Simule le déplacement des fourmis jusqu'à ce que toutes les fourmis soient dans le dortoir.
         """
         etapes = 0
+        dernière_position = {i: 'Sv' for i in range(self.nb_fourmis)}
         while not self.toutes_fourmis_dans_dortoir():
             self.deplacer_fourmis()
             etapes += 1
-            # print(f"Étape {etapes}: Positions des fourmis: {self.positions}")
-            # print(f"Étape {etapes}: État des salles: {self.salles}")
+            print(f" +++ Étape {etapes}: +++ ")
+            for fourmi in range(self.nb_fourmis):
+                if self.positions[fourmi] == dernière_position[fourmi]:
+                    continue
+                if len(self.historique[fourmi]) > 1:
+                    print(f"Fourmi {fourmi}: {self.historique[fourmi][-2]} -> {self.historique[fourmi][-1]}")
+                elif len(self.historique[fourmi]) == 1:
+                    pass
+                dernière_position[fourmi] = self.positions[fourmi]
+
         return etapes
