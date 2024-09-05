@@ -89,7 +89,7 @@ class Fourmiliere:
                 if self.positions[fourmi] == dernière_position[fourmi]:
                     continue
                 if len(self.historique[fourmi]) > 1:
-                    print(f"Fourmi {fourmi}: {self.historique[fourmi][-2]} -> {self.historique[fourmi][-1]}")
+                    print(f"f{fourmi} - {self.historique[fourmi][-2]} - {self.historique[fourmi][-1]}")
                 elif len(self.historique[fourmi]) == 1:
                     pass
                 dernière_position[fourmi] = self.positions[fourmi]
