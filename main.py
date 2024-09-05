@@ -45,27 +45,20 @@ def lire_fichier_fourmiliere(fichier):
     return nb_fourmis, salles, tunnels, capacites
 
 if __name__ == "__main__":
-    fichier_zero = 'Nest/fourmiliere_zero.txt'
-    fichier_un = 'Nest/fourmiliere_un.txt'
-    fichier_deux = 'Nest/fourmiliere_deux.txt'
-    fichier_trois = 'Nest/fourmiliere_trois.txt'
-    fichier_quatre = 'Nest/fourmiliere_quatre.txt'
-    fichier_cinq = 'Nest/fourmiliere_cinq.txt'
-    
     # ask user to choose a file using input
     fichier = input("Entrer le numéro du fichier de fourmilière à simuler (0, 1, 2, 3, 4, 5): ")
     if fichier == '0':
-        fichier = fichier_zero
+        fichier = 'Nest/fourmiliere_zero.txt'
     elif fichier == '1':
-        fichier = fichier_un
+        fichier = 'Nest/fourmiliere_un.txt'
     elif fichier == '2':
-        fichier = fichier_deux
+        fichier = 'Nest/fourmiliere_deux.txt'
     elif fichier == '3':
-        fichier = fichier_trois
+        fichier = 'Nest/fourmiliere_trois.txt'
     elif fichier == '4':
-        fichier = fichier_quatre
+        fichier = 'Nest/fourmiliere_quatre.txt'
     elif fichier == '5':
-        fichier = fichier_cinq
+        fichier = 'Nest/fourmiliere_cinq.txt'
 
     nb_fourmis, salles, tunnels, capacites = lire_fichier_fourmiliere(fichier)
 
