@@ -4,9 +4,6 @@ import random
 import matplotlib.pyplot as plt
 
 class Fourmiliere:
-    """
-    Classe représentant une fourmilière.
-    """
     def __init__(self, salles, tunnels, nb_fourmis, capacites):
         self.salles = salles
         self.tunnels = tunnels
@@ -18,28 +15,40 @@ class Fourmiliere:
         self.historique = {i: ['Sv'] for i in range(nb_fourmis)}
         self.etapes = []
         self.graph = nx.Graph()
-        self.graph.add_nodes_from(salles.keys())
         for salle, tunnel in tunnels.items():
             for t in tunnel:
                 self.graph.add_edge(salle, t)
+        
+        # Stocker tous les chemins optimaux
+        self.chemins_optimaux = self.trouver_chemin_optimal('Sv', 'Sd')
+        
+        # Assigner un chemin à chaque fourmi
+        self.chemins_assignes = {i: self.chemins_optimaux[i % len(self.chemins_optimaux)] for i in range(nb_fourmis)}
 
     def deplacer_fourmis(self):
-        """ 
-        Déplace les fourmis d'une salle à une autre.
+        """
+        Déplace les fourmis en suivant leur chemin assigné.
         """
         etape = {}
         for fourmi in range(self.nb_fourmis):
             current_room = self.positions[fourmi]
             if current_room == 'Sd':
                 continue
-            possible_moves = [next_room for next_room in self.tunnels[current_room] if self.peut_se_deplacer(next_room, fourmi)]
-            if possible_moves:
-                next_room = random.choice(possible_moves)
-                self.positions[fourmi] = next_room
-                self.salles[current_room] -= 1
-                self.salles[next_room] += 1
-                self.historique[fourmi].append(next_room)
-                etape[fourmi] = (current_room, next_room)
+            # Récupérer le chemin assigné à la fourmi
+            chemin = self.chemins_assignes[fourmi]
+            
+            # Trouver la prochaine salle sur le chemin
+            if current_room in chemin:
+                next_room_index = chemin.index(current_room) + 1
+                if next_room_index < len(chemin):
+                    next_room = chemin[next_room_index]
+                    # Vérifier que la salle peut accueillir la fourmi
+                    if self.peut_se_deplacer(next_room, fourmi):
+                        self.positions[fourmi] = next_room
+                        self.salles[current_room] -= 1
+                        self.salles[next_room] += 1
+                        self.historique[fourmi].append(next_room)
+                        etape[fourmi] = (current_room, next_room)
         self.etapes.append(etape)
 
     def peut_se_deplacer(self, salle, fourmi):
@@ -48,38 +57,19 @@ class Fourmiliere:
         """
         if salle == 'Sd':
             return True
-        if salle in self.historique[fourmi]:
-            return False
         if self.salles[salle] >= self.capacites[salle]:
-            return False
-        if not self.est_sur_chemin_optimal(salle, fourmi):
             return False
         return True
 
-    def est_sur_chemin_optimal(self, salle, fourmi):
-        """
-        Vérifie si une fourmi peut se déplacer dans une salle donnée,
-        en fonction de tous les chemins possibles entre 'Sv' et 'Sd'.
-        """
-        chemins_optimal = list(nx.all_shortest_paths(self.graph, source=self.positions[fourmi], target='Sd'))
-        
-        # Vérifie si la salle appartient à l'un des chemins les plus courts vers Sd
-        for chemin in chemins_optimal:
-            if salle in chemin:
-                return True
-        return False
-
     def trouver_chemin_optimal(self, depart, arrivee):
         """
-        Trouve tous les chemins optimaux entre deux salles.
-        Utilise nx.all_shortest_paths pour trouver tous les plus courts chemins entre deux nœuds.
+        Trouve tous les chemins possibles entre deux salles.
+        Utilise nx.all_simple_paths pour trouver tous les chemins simples entre deux nœuds.
         """
         try:
-            # Utilise NetworkX pour trouver tous les chemins les plus courts
-            chemins_optimaux = list(nx.all_shortest_paths(self.graph, source=depart, target=arrivee))
-            return chemins_optimaux
+            chemins_possibles = list(nx.all_simple_paths(self.graph, source=depart, target=arrivee))
+            return chemins_possibles
         except nx.NetworkXNoPath:
-            # Si aucun chemin n'existe, renvoyer une liste vide
             return []
 
     def toutes_fourmis_dans_dortoir(self):
@@ -89,7 +79,7 @@ class Fourmiliere:
         return self.salles['Sd'] == self.nb_fourmis
 
     def simuler(self):
-        """" 
+        """
         Simule le déplacement des fourmis jusqu'à ce que toutes les fourmis soient dans le dortoir.
         """
         etapes = 0
@@ -108,6 +98,7 @@ class Fourmiliere:
                 dernière_position[fourmi] = self.positions[fourmi]
 
         return etapes
+
 
     def simuler_deplacements(self):
         """
