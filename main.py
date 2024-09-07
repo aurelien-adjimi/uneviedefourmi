@@ -10,14 +10,19 @@ if __name__ == "__main__":
         '4': 'Nest/fourmiliere_quatre.txt',
         '5': 'Nest/fourmiliere_cinq.txt'
     }
-    fichier = fichiers.get(fichier, 'Nest/fourmiliere_zero.txt')
+    
+    # Vérification que l'entrée utilisateur est correcte
+    if fichier not in fichiers:
+        print(f"Erreur : le numéro de fichier '{fichier}' est invalide. Veuillez entrer un numéro entre 0 et 5.")
+    else:
+        fichier = fichiers[fichier]  # Sélection du fichier correspondant
 
-    nb_fourmis, salles, tunnels, capacites = lire_fichier_fourmiliere(fichier)
+        nb_fourmis, salles, tunnels, capacites = lire_fichier_fourmiliere(fichier)
 
-    fourmiliere = Fourmiliere(salles, tunnels, nb_fourmis, capacites)
-    etapes = fourmiliere.simuler()
+        fourmiliere = Fourmiliere(salles, tunnels, nb_fourmis, capacites)
+        etapes = fourmiliere.simuler()
 
-    print(f"Nombre d'étapes pour que chaque fourmi arrive au dortoir: {etapes}")
+        print(f"Nombre d'étapes pour que chaque fourmi arrive au dortoir: {etapes}")
 
-    # Visualiser les déplacements des fourmis
-    visualiser_deplacements(fourmiliere)
+        # Visualiser les déplacements des fourmis
+        visualiser_deplacements(fourmiliere)

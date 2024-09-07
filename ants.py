@@ -1,12 +1,12 @@
-from collections import deque
+import numpy as np
 import networkx as nx
-import random
+from collections import deque
 import matplotlib.pyplot as plt
+import random
 
 class Fourmiliere:
     def __init__(self, salles, tunnels, nb_fourmis, capacites):
         self.salles = salles
-        self.tunnels = tunnels
         self.nb_fourmis = nb_fourmis
         self.capacites = capacites
         self.positions = {i: 'Sv' for i in range(nb_fourmis)}
@@ -14,35 +14,45 @@ class Fourmiliere:
         self.salles['Sd'] = 0
         self.historique = {i: ['Sv'] for i in range(nb_fourmis)}
         self.etapes = []
-        self.graph = nx.Graph()
-        for salle, tunnel in tunnels.items():
-            for t in tunnel:
-                self.graph.add_edge(salle, t)
+
+        # Créer une matrice d'adjacence vide
+        self.n = len(salles)
+        self.salle_indices = {salle: i for i, salle in enumerate(salles.keys())}
+        self.adjacence = np.zeros((self.n, self.n), dtype=int)
         
-        # Stocker tous les chemins optimaux
-        self.chemins_optimaux = self.trouver_chemin_optimal('Sv', 'Sd')
-        
+        # Remplir la matrice d'adjacence en fonction des tunnels
+        for salle1, connexions in tunnels.items():
+            for salle2 in connexions:
+                i, j = self.salle_indices[salle1], self.salle_indices[salle2]
+                self.adjacence[i][j] = 1  # matrice orientée
+
+        # Créer un graphe à partir de la matrice d'adjacence
+        self.graph = nx.from_numpy_array(self.adjacence, create_using=nx.DiGraph)
+        self.mapping = {v: k for k, v in self.salle_indices.items()}
+        self.graph = nx.relabel_nodes(self.graph, self.mapping)
+
+        # Trouver tous les chemins possibles
+        chemins_possibles = self.trouver_chemin_optimal('Sv', 'Sd')
+        chemins_possibles.sort(key=len)  # Trier les chemins par longueur
+
         # Assigner un chemin à chaque fourmi
-        self.chemins_assignes = {i: self.chemins_optimaux[i % len(self.chemins_optimaux)] for i in range(nb_fourmis)}
+        self.chemins_assignes = {}
+        for i in range(nb_fourmis):
+            chemin = chemins_possibles[i % len(chemins_possibles)]
+            self.chemins_assignes[i] = chemin
 
     def deplacer_fourmis(self):
-        """
-        Déplace les fourmis en suivant leur chemin assigné.
-        """
         etape = {}
         for fourmi in range(self.nb_fourmis):
             current_room = self.positions[fourmi]
             if current_room == 'Sd':
                 continue
-            # Récupérer le chemin assigné à la fourmi
             chemin = self.chemins_assignes[fourmi]
-            
-            # Trouver la prochaine salle sur le chemin
             if current_room in chemin:
                 next_room_index = chemin.index(current_room) + 1
                 if next_room_index < len(chemin):
                     next_room = chemin[next_room_index]
-                    # Vérifier que la salle peut accueillir la fourmi
+                    # Vérification des capacités et déplacement
                     if self.peut_se_deplacer(next_room, fourmi):
                         self.positions[fourmi] = next_room
                         self.salles[current_room] -= 1
@@ -62,10 +72,6 @@ class Fourmiliere:
         return True
 
     def trouver_chemin_optimal(self, depart, arrivee):
-        """
-        Trouve tous les chemins possibles entre deux salles.
-        Utilise nx.all_simple_paths pour trouver tous les chemins simples entre deux nœuds.
-        """
         try:
             chemins_possibles = list(nx.all_simple_paths(self.graph, source=depart, target=arrivee))
             return chemins_possibles
@@ -99,14 +105,12 @@ class Fourmiliere:
 
         return etapes
 
-
     def simuler_deplacements(self):
         """
         Simule les déplacements des fourmis et stocke les étapes.
         """
         while not self.toutes_fourmis_dans_dortoir():
             self.deplacer_fourmis()
-
 
 def lire_fichier_fourmiliere(fichier):
     """
@@ -143,25 +147,23 @@ def lire_fichier_fourmiliere(fichier):
 
     return nb_fourmis, salles, tunnels, capacites
 
-
 def visualiser_deplacements(simulation):
     """
     Visualise les déplacements des fourmis dans la fourmilière.
     """
     fig, ax = plt.subplots()
     
-    G = nx.Graph()
-    G.add_nodes_from(simulation.salles.keys())
-    for salle, tunnel in simulation.tunnels.items():
-        for t in tunnel:
-            # add edge between salle and t with a arrow head
-            G.add_edge(salle, t, color='black', arrowstyle='-|>', arrowsize=15)
-
+    # Créer un graphe basé sur la matrice d'adjacence
+    G = nx.from_numpy_array(simulation.adjacence, create_using=nx.DiGraph)
+    mapping = {v: k for k, v in simulation.salle_indices.items()}
+    G = nx.relabel_nodes(G, mapping)
+    
     pos = {
         'Sv': (0, 1),
         'Sd': (1, 0),
     }
 
+    # Disposition des nœuds
     pos.update(nx.spring_layout(G, seed=42))
 
     color_map = []
@@ -178,9 +180,8 @@ def visualiser_deplacements(simulation):
     # Visualiser les déplacements
     for index, etape in enumerate(simulation.etapes):
         ax.clear()
-        nx.draw(simulation.graph, pos, with_labels=True, node_size=700, node_color=color_map, ax=ax)
+        nx.draw(G, pos, with_labels=True, node_size=700, node_color=color_map, ax=ax)
     
-        
         # Ajouter des annotations pour représenter les fourmis par F(n)
         for id_fourmi, (start, end) in etape.items():
             if start and end:
