@@ -100,4 +100,4 @@ graph TD
 * Visualisation des déplacements : À chaque étape de la simulation, un graphe est dessiné pour montrer la position actuelle des fourmis.
 
 ## 5. Représentation graphique des déplacements.  
-
+[![Watch the video](https://raw.githubusercontent.com/username/repository/branch/path/to/thumbnail.jpg)](https://raw.githubusercontent.com/username/repository/branch/path/to/video.mp4)
