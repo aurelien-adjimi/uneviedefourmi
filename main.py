@@ -1,41 +1,28 @@
-from ants import Anthill
-
-def load_anthill(filename):
-    with open(filename, "r") as file:
-        lines = file.readlines()
-
-    nb_ants = 0
-    rooms = {}
-    tunnels = []
-
-    for line in lines: 
-        line = line.strip()
-
-        if line.startswith("f="):
-            nb_ants = int(line.split('=')[1])
-        elif line.startswith("S") and "-" not in line:
-            if "{" in line:
-                room, capacity = line.split("{")
-                room = room.strip()
-                capacity = int(capacity.split("}")[0].strip())
-            else:
-                room = line.strip()
-                capacity = 1
-            rooms[room] = capacity
-        elif "-" in line:
-            room1, room2 = line.split("-")
-            tunnels.append((room1.strip(), room2.strip()))
-    
-    return nb_ants, rooms, tunnels
-
-def main():
-    filename = 'fourmiliere_quatre.txt'
-    nb_ants, rooms, tunnels = load_anthill(filename)
-
-    anthill = Anthill(rooms, tunnels)
-    anthill.add_ants(nb_ants)
-    anthill.move_ants()
-    anthill.plot_graph()
+from ants import Fourmiliere, lire_fichier_fourmiliere, visualiser_deplacements
 
 if __name__ == "__main__":
-    main()
+    fichier = input("Entrer le numéro du fichier de fourmilière à simuler (0, 1, 2, 3, 4, 5): ")
+    fichiers = {
+        '0': 'Nest/fourmiliere_zero.txt',
+        '1': 'Nest/fourmiliere_un.txt',
+        '2': 'Nest/fourmiliere_deux.txt',
+        '3': 'Nest/fourmiliere_trois.txt',
+        '4': 'Nest/fourmiliere_quatre.txt',
+        '5': 'Nest/fourmiliere_cinq.txt'
+    }
+    
+    # Vérification que l'entrée utilisateur est correcte
+    if fichier not in fichiers:
+        print(f"Erreur : le numéro de fichier '{fichier}' est invalide. Veuillez entrer un numéro entre 0 et 5.")
+    else:
+        fichier = fichiers[fichier]  # Sélection du fichier correspondant
+
+        nb_fourmis, salles, tunnels, capacites = lire_fichier_fourmiliere(fichier)
+
+        fourmiliere = Fourmiliere(salles, tunnels, nb_fourmis, capacites)
+        etapes = fourmiliere.simuler()
+
+        print(f"Nombre d'étapes pour que chaque fourmi arrive au dortoir: {etapes}")
+
+        # Visualiser les déplacements des fourmis
+        visualiser_deplacements(fourmiliere)
