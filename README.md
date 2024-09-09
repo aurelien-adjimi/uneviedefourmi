@@ -100,4 +100,10 @@ graph TD
 * Visualisation des déplacements : À chaque étape de la simulation, un graphe est dessiné pour montrer la position actuelle des fourmis.
 
 ## 5. Représentation graphique des déplacements.  
-[![Watch the video](https://raw.githubusercontent.com/username/repository/branch/path/to/thumbnail.jpg)](https://raw.githubusercontent.com/username/repository/branch/path/to/video.mp4)
+[![Watch the video](./img/unnamed.gif)](./img/unnamed.gif)
+
+Pour réaliser la représentation graphique des déplacements des fourmis (dont vous pouvez voir l'animation) nous nous sommes servis des librairies Pyplot et NetworkX.  
+
+
+## 6. Conclusion  
+Nous avons décidé de faire le travail pour les six fourmilières du projet. Nous pouvons constater que la complexité des fourmilières ainsi que le nombre de fourmis influent fortement sur le nombre d'étapes nécessaires pour rapatrier tout le monde au dortoir.  
