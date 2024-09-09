@@ -91,8 +91,13 @@ graph TD
 ```
   
 
-## 4. Affichage des étapes de déplacement pour les fourmis de chaque fourmilière.  
-Afin de faire ceci, nous nous sommes servis de la librairie NetworkX  
+## 4. Fonctionalités.  
+
+* Génération d'un graphe de salles et tunnels : Le programme lit une configuration de fourmilière à partir d'un fichier, construisant un graphe orienté avec une matrice d'adjacence pour représenter les connexions entre salles.
+* Calcul des chemins optimaux : Utilise la bibliothèque NetworkX pour trouver tous les chemins possibles entre la salle de départ et la salle de dortoir. Les chemins sont triés pour prioriser les plus courts.
+* Gestion des capacités de salles : Chaque salle peut avoir une capacité maximale de fourmis. Une fourmi ne peut pas entrer dans une salle pleine.
+* Simulation des déplacements : Les fourmis se déplacent à travers le graphe en suivant les chemins assignés. Si un chemin devient inaccessible (ex. : salle pleine), le chemin est recalculé.
+* Visualisation des déplacements : À chaque étape de la simulation, un graphe est dessiné pour montrer la position actuelle des fourmis.
 
 ## 5. Représentation graphique des déplacements.  
 
