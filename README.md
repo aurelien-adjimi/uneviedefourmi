@@ -13,22 +13,82 @@ Pour chacune des fourmilières nous devions:
 
 ## 3. Représentation graphique des fourmilières.  
 
-<u><i>Fourmilière 1.</i></u>
-![Représentation graphique de la foumilière 1](./img/f1.png "Fourmilière 1")  
+### Fourmilière 0
+```mermaid 
+graph TD
+    A[Sv] --> B[S1]
+    A --> C[S2]
+    B --> D[Sd]
+    C --> D
+```
 
-<u><i>Fourmilière 2.</i></u>
-![Représentation graphique de la foumilière 2](./img/f2.png "Fourmilière 2")  
+### Fourmilière 1
+```mermaid
+graph TD
+    A[Sv] --> B[S1]
+    B --> C[S2]
+    C --> D[S3]
+    B --> E[S4]
+    E --> F[Sd]
+```
 
-<u><i>Fourmilière 3.</i></u>
-![Représentation graphique de la foumilière 3](./img/f3.png "Fourmilière 3")  
+### Fourmilière 2
+```mermaid
+graph TD
+    A[Sv] --> B[S1]
+    B --> C[S2]
+    C --> D[Sd]
+    A --> D
+```
 
-<u><i>Fourmilière 4.</i></u>
-![Représentation graphique de la foumilière 4](./img/f4.png "Fourmilière 4")  
+### Fourmilière 3
+```mermaid
+graph TD
+    A[Sv] --> B[S1]
+    B --> C[S2]
+    B --> D[S4]
+    C --> E[S3]
+    D --> F
+```
 
-<u><i>Fourmilière 5.</i></u>
-![Représentation graphique de la foumilière 5](./img/f5.png "Fourmilière 5")  
+### Fourmilière 4
+```mermaid
+graph TD
+    A[Sv] --> B[S1]
+    B --> C[S2]
+    B --> D[S3]
+    C --> E[S4]
+    E --> F[S5]
+    F --> G[Sd]
+    D --> E
+    E --> I[S6]
+    I --> G
+```
 
-<u><i>Fourmilière 6.</i></u>
+### Fourmilière 5
+```mermaid
+graph TD
+    A[Sv] --> B[S1]
+    B --> C[S2]
+    C --> D[S3]
+    D --> E[S4]
+    E --> F[Sd]
+    C --> G[S5]
+    G --> E
+    B --> H[S6]
+    H --> I[S8]
+    I --> J[S11]
+    I --> P[S12]
+    P --> K
+    J --> K[S13]
+    K --> F
+    H --> L[S7]
+    L --> M[S9]
+    L --> N[S10]
+    M --> O[S14]
+    O --> F
+    N --> O
+```
   
 
 ## 4. Affichage des étapes de déplacement pour les fourmis de chaque fourmilière.  
