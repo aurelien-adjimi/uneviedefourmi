@@ -48,7 +48,7 @@ graph TD
     B --> C[S2]
     B --> D[S4]
     C --> E[S3]
-    D --> F
+    D --> F[Sd]
 ```
 
 ### Fourmilière 4
